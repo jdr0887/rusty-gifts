@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8" />
+    <title>Gift App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script type="text/javascript" src="/public/text-polyfill.min.js"></script>
+    <link href="//netdna.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/styles.css" rel="stylesheet" />
+  </head>
+
+  <body>
+    <section id="app"></section>
+    <script type="module">
+      // https://rustwasm.github.io/docs/wasm-bindgen/examples/without-a-bundler.html
+      import init from '/pkg/package.js';
+      init('/pkg/package_bg.wasm');
+    </script>
+  </body>
+
+</html>

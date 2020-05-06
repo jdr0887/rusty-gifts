@@ -1,0 +1,7 @@
+CREATE TABLE user_gifts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  user_id INTEGER NOT NULL,
+  gift_id INTEGER NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users (id),
+  FOREIGN KEY (gift_id) REFERENCES gifts (id)
+)
