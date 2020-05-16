@@ -4,19 +4,14 @@ use crate::session::Session;
 use crate::GMsg;
 use seed::prelude::*;
 use seed::*;
-use serde::{Deserialize, Serialize};
 
 #[derive(Default, Debug)]
 pub struct Model {
     session: Session,
-    problems: Vec<(String, String)>,
     email: String,
     first_name: String,
     last_name: String,
     phone: String,
-    password: String,
-    confirm_password: String,
-    base_url: Url,
 }
 
 impl Model {
@@ -32,7 +27,21 @@ impl From<Model> for Session {
 }
 
 pub fn init(session: Session, orders: &mut impl Orders<Msg, GMsg>) -> Model {
-    Model { session, ..Model::default() }
+    let user = LocalStorage::get(crate::STORAGE_KEY).ok();
+    let session = Session::new(user.clone());
+    if session.viewer().is_none() {
+        route::go_to(route::Route::Login, orders);
+    }
+
+    let user = user.unwrap();
+    let mut model = Model::default();
+    model.session = session;
+    model.first_name = user.first_name;
+    model.last_name = user.last_name;
+    model.email = user.email;
+    // model.phone = user.phone.unwrap_or("");
+
+    model
 }
 
 pub fn sink(g_msg: GMsg, model: &mut Model, orders: &mut impl Orders<Msg, GMsg>) {
@@ -49,7 +58,9 @@ pub fn sink(g_msg: GMsg, model: &mut Model, orders: &mut impl Orders<Msg, GMsg>)
 #[derive(Debug)]
 pub enum Msg {
     EmailChanged(String),
-    PasswordChanged(String),
+    FirstNameChanged(String),
+    LastNameChanged(String),
+    PhoneChanged(String),
     RegisterSubmitted,
     RegisterCancelled,
 }
@@ -57,9 +68,9 @@ pub enum Msg {
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg, GMsg>) {
     match msg {
         Msg::EmailChanged(email) => model.email = email,
-        // Msg::FirstNameChanged(first_name) => model.first_name = Some(first_name),
-        // Msg::LastNameChanged(last_name) => model.last_name = Some(last_name),
-        Msg::PasswordChanged(password) => model.password = password,
+        Msg::FirstNameChanged(first_name) => model.first_name = first_name,
+        Msg::LastNameChanged(last_name) => model.last_name = last_name,
+        Msg::PhoneChanged(phone) => model.phone = phone,
         Msg::RegisterSubmitted => {
             // orders.notify(subs::UrlRequested::new(Urls::new(&model.base_url).register()));
         }
@@ -94,10 +105,10 @@ pub fn view(model: &Model) -> ViewPage<Msg> {
     ViewPage::new(
         "Profile",
         div![
-            class!["col-md-6", "offset-md-3" "mt-5"],
+            class!["col-md-6", "offset-md-3" "mt-4"],
             div![
                 attrs! { At::Class => "card" },
-                h4![attrs! { At::Class => "card-header" }, "Gift App Profile",],
+                h4![attrs! { At::Class => "card-header" }, "Profile",],
                 div![
                     attrs! { At::Class => "card-body" },
                     form![
@@ -105,16 +116,16 @@ pub fn view(model: &Model) -> ViewPage<Msg> {
                             attrs! { At::Class => "form-group" },
                             label!["First Name"],
                             input![
-                                attrs! { At::Type => "text", At::Class => "form-control", At::Value => model.email, },
-                                input_ev(Ev::Input, Msg::EmailChanged)
+                                attrs! { At::Type => "text", At::Class => "form-control", At::Value => model.first_name, },
+                                input_ev(Ev::Input, Msg::FirstNameChanged)
                             ],
                         ],
                         div![
                             attrs! { At::Class => "form-group" },
                             label!["Last Name"],
                             input![
-                                attrs! { At::Type => "text", At::Class => "form-control", At::Value => model.email, },
-                                input_ev(Ev::Input, Msg::EmailChanged)
+                                attrs! { At::Type => "text", At::Class => "form-control", At::Value => model.last_name, },
+                                input_ev(Ev::Input, Msg::LastNameChanged)
                             ],
                         ],
                         div![
@@ -129,24 +140,8 @@ pub fn view(model: &Model) -> ViewPage<Msg> {
                             attrs! { At::Class => "form-group" },
                             label!["Phone"],
                             input![
-                                attrs! { At::Type => "text", At::Class => "form-control", At::Value => model.email, },
-                                input_ev(Ev::Input, Msg::EmailChanged)
-                            ],
-                        ],
-                        div![
-                            attrs! { At::Class => "form-group" },
-                            label!["Password"],
-                            input![
-                                attrs! { At::Type => "password", At::Class => "form-control", At::Value => model.password, },
-                                input_ev(Ev::Input, Msg::PasswordChanged)
-                            ],
-                        ],
-                        div![
-                            attrs! { At::Class => "form-group" },
-                            label!["Confirm Password"],
-                            input![
-                                attrs! { At::Type => "password", At::Class => "form-control", At::Value => model.password, },
-                                input_ev(Ev::Input, Msg::PasswordChanged)
+                                attrs! { At::Type => "text", At::Class => "form-control", At::Value => model.phone, },
+                                input_ev(Ev::Input, Msg::PhoneChanged)
                             ],
                         ],
                         div![

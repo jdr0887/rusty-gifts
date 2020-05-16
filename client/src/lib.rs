@@ -33,6 +33,7 @@ enum Model {
     Register(page::register::Model),
     Profile(page::profile::Model),
     GiftIdeas(page::gift_ideas::Model),
+    AddGiftIdea(page::add_gift_idea::Model),
 }
 
 impl Default for Model {
@@ -50,20 +51,20 @@ impl From<Model> for Session {
             Model::Register(model) => model.into(),
             Model::Profile(model) => model.into(),
             Model::GiftIdeas(model) => model.into(),
+            Model::AddGiftIdea(model) => model.into(),
         }
     }
 }
 
 pub enum GMsg {
-    RoutePushed(Route<'static>),
+    RoutePushed(Route),
     SessionChanged(Session),
 }
 
-fn sink(g_msg: GMsg, model: &mut Model, orders: &mut impl Orders<Msg<'static>, GMsg>) {
+fn sink(g_msg: GMsg, model: &mut Model, orders: &mut impl Orders<Msg, GMsg>) {
     if let GMsg::RoutePushed(ref route) = g_msg {
         orders.send_msg(Msg::RouteChanged(Some(route.clone())));
     }
-    log!("lib.sink().model: ", model);
     match model {
         Model::NotFound(_) | Model::Redirect(_) => {
             if let GMsg::SessionChanged(session) = g_msg {
@@ -76,21 +77,23 @@ fn sink(g_msg: GMsg, model: &mut Model, orders: &mut impl Orders<Msg<'static>, G
         Model::Register(model) => page::register::sink(g_msg, model, &mut orders.proxy(Msg::RegisterMsg)),
         Model::Profile(model) => page::profile::sink(g_msg, model, &mut orders.proxy(Msg::ProfileMsg)),
         Model::GiftIdeas(model) => page::gift_ideas::sink(g_msg, model, &mut orders.proxy(Msg::GiftIdeasMsg)),
+        Model::AddGiftIdea(model) => page::add_gift_idea::sink(g_msg, model, &mut orders.proxy(Msg::AddGiftIdeaMsg)),
     }
 }
 
 #[allow(clippy::enum_variant_names)]
 #[derive(Debug)]
-enum Msg<'a> {
-    RouteChanged(Option<Route<'a>>),
+enum Msg {
+    RouteChanged(Option<Route>),
     HomeMsg(page::home::Msg),
     LoginMsg(page::login::Msg),
     RegisterMsg(page::register::Msg),
     ProfileMsg(page::profile::Msg),
     GiftIdeasMsg(page::gift_ideas::Msg),
+    AddGiftIdeaMsg(page::add_gift_idea::Msg),
 }
 
-fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg<'static>, GMsg>) {
+fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg, GMsg>) {
     match msg {
         Msg::RouteChanged(route) => {
             change_model_by_route(route, model, orders);
@@ -120,38 +123,15 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg<'static>, GM
                 page::gift_ideas::update(module_msg, module_model, &mut orders.proxy(Msg::GiftIdeasMsg));
             }
         }
+        Msg::AddGiftIdeaMsg(module_msg) => {
+            if let Model::AddGiftIdea(module_model) = model {
+                page::add_gift_idea::update(module_msg, module_model, &mut orders.proxy(Msg::AddGiftIdeaMsg));
+            }
+        }
     }
 }
 
-// fn change_model_by_route<'a>(route: Option<Route<'a>>, model: &mut Model<'a>, orders: &mut impl Orders<Msg<'static>, GMsg>) {
-//     let mut session = || Session::from(take(model));
-//     match route {
-//         None => *model = Model::NotFound(session()),
-//         Some(route) => match route {
-//             Route::Root => route::go_to(Route::Home, orders),
-//             Route::Logout => {
-//                 storage::delete_app_data();
-//                 orders.send_g_msg(GMsg::SessionChanged(Session::Guest));
-//                 route::go_to(Route::Home, orders)
-//             }
-//             Route::Settings => {
-//                 *model = Model::Settings(page::settings::init(session(), &mut orders.proxy(Msg::SettingsMsg)));
-//             }
-//             Route::Home => {
-//                 *model = Model::Home(page::home::init(session(), &mut orders.proxy(Msg::HomeMsg)));
-//             }
-//             Route::Login => {
-//                 *model = Model::Login(page::login::init(session()));
-//             }
-//             Route::Register => {
-//                 *model = Model::Register(page::register::init(session()));
-//             }
-//         },
-//     };
-// }
-
-fn change_model_by_route(route: Option<Route>, model: &mut Model, orders: &mut impl Orders<Msg<'static>, GMsg>) {
-    log!("change_model_by_route:model: ", model);
+fn change_model_by_route(route: Option<Route>, model: &mut Model, orders: &mut impl Orders<Msg, GMsg>) {
     let mut session = || Session::from(take(model));
     match route {
         None => *model = Model::NotFound(session()),
@@ -170,19 +150,20 @@ fn change_model_by_route(route: Option<Route>, model: &mut Model, orders: &mut i
             Route::Register => {
                 *model = Model::Register(page::register::init(session()));
             }
-            Route::Profile(username) => {
+            Route::Profile => {
                 *model = Model::Profile(page::profile::init(session(), &mut orders.proxy(Msg::ProfileMsg)));
             }
             Route::GiftIdeas => {
-                log!("change_model_by_route:session().viewer(): ", session().viewer());
-                log!("change_model_by_route:route: ", route);
                 *model = Model::GiftIdeas(page::gift_ideas::init(session(), &mut orders.proxy(Msg::GiftIdeasMsg)));
+            }
+            Route::AddGiftIdea => {
+                *model = Model::AddGiftIdea(page::add_gift_idea::init(session(), &mut orders.proxy(Msg::AddGiftIdeaMsg)));
             }
         },
     };
 }
 
-fn view(model: &Model) -> impl IntoNodes<Msg<'static>> {
+fn view(model: &Model) -> impl IntoNodes<Msg> {
     match model {
         Model::Redirect(session) => Page::Other.view(page::blank::view(), session.viewer()),
         Model::NotFound(session) => Page::Other.view(page::not_found::view(), session.viewer()),
@@ -191,6 +172,7 @@ fn view(model: &Model) -> impl IntoNodes<Msg<'static>> {
         Model::Register(model) => Page::Register.view(page::register::view(model), model.session().viewer()).map_msg(Msg::RegisterMsg),
         Model::Profile(model) => Page::Profile.view(page::profile::view(model), model.session().viewer()).map_msg(Msg::ProfileMsg),
         Model::GiftIdeas(model) => Page::GiftIdeas.view(page::gift_ideas::view(model), model.session().viewer()).map_msg(Msg::GiftIdeasMsg),
+        Model::AddGiftIdea(model) => Page::AddGiftIdea.view(page::add_gift_idea::view(model), model.session().viewer()).map_msg(Msg::AddGiftIdeaMsg),
     }
 }
 
@@ -198,7 +180,7 @@ fn before_mount(_: Url) -> BeforeMount {
     BeforeMount::new().mount_type(MountType::Takeover)
 }
 
-fn after_mount(url: Url, orders: &mut impl Orders<Msg<'static>, GMsg>) -> AfterMount<Model> {
+fn after_mount(url: Url, orders: &mut impl Orders<Msg, GMsg>) -> AfterMount<Model> {
     orders.send_msg(Msg::RouteChanged(url.try_into().ok()));
     let user = LocalStorage::get(STORAGE_KEY).ok();
     let model = Model::Redirect(Session::new(user));

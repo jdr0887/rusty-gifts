@@ -5,8 +5,6 @@ use crate::GMsg;
 use crate::LoggedUser;
 use seed::prelude::*;
 use seed::*;
-use serde::{Deserialize, Serialize};
-use std::borrow::Cow;
 
 #[derive(Default, Clone, Debug)]
 pub struct Form {
@@ -114,10 +112,10 @@ pub fn view(model: &Model) -> ViewPage<Msg> {
     ViewPage::new(
         "Login",
         div![
-            class!["col-md-4", "offset-md-4" "mt-5"],
+            class!["col-md-4", "offset-md-4" "mt-4"],
             div![
                 attrs! { At::Class => "card" },
-                h4![attrs! { At::Class => "card-header" }, "Gift App Login",],
+                h4![attrs! { At::Class => "card-header" }, "Login",],
                 div![
                     attrs! { At::Class => "card-body" },
                     form![

@@ -1,47 +1,48 @@
 use crate::GMsg;
-use std::borrow::Cow;
 use std::convert;
 use std::fmt;
 
 use seed::prelude::*;
 
 #[derive(Clone, Debug)]
-pub enum Route<'a> {
+pub enum Route {
     Home,
     Login,
     Logout,
     Register,
-    Profile(Cow<'a, str>),
+    Profile,
     GiftIdeas,
+    AddGiftIdea,
 }
 
-impl<'a> Route<'a> {
+impl Route {
     pub fn path(&self) -> Vec<&str> {
         match self {
             super::Route::Home => vec![],
             super::Route::Login => vec!["login"],
             super::Route::Logout => vec!["logout"],
             super::Route::Register => vec!["register"],
-            super::Route::Profile(username) => vec!["profile", username],
+            super::Route::Profile => vec!["profile"],
             super::Route::GiftIdeas => vec!["gift_ideas"],
+            super::Route::AddGiftIdea => vec!["add_gift_idea"],
         }
     }
 }
 
-impl<'a> fmt::Display for Route<'a> {
+impl fmt::Display for Route {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "/{}", self.path().join("/"))
     }
 }
 
-impl<'a> From<Route<'a>> for seed::Url {
+impl From<Route> for seed::Url {
     fn from(route: Route) -> Self {
         seed::Url::new().set_path(route.path())
         //route.path().into()
     }
 }
 
-impl<'a> convert::TryFrom<seed::Url> for Route<'a> {
+impl convert::TryFrom<seed::Url> for Route {
     type Error = ();
 
     fn try_from(url: seed::Url) -> Result<Self, Self::Error> {
@@ -53,9 +54,9 @@ impl<'a> convert::TryFrom<seed::Url> for Route<'a> {
             Some("logout") => Some(Route::Logout),
             Some("register") => Some(Route::Register),
             Some("home") => Some(Route::Home),
-            // Some("profile") => Some(Route::Profile),
-            Some("profile") => path.next().filter(|username| !username.is_empty()).map(Username::from).map(Cow::Owned).map(Route::Profile),
+            Some("profile") => Some(Route::Profile),
             Some("gift_ideas") => Some(Route::GiftIdeas),
+            Some("add_gift_idea") => Some(Route::AddGiftIdea),
             _ => None,
         }
         .ok_or(())

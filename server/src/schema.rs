@@ -12,11 +12,15 @@ table! {
 table! {
     gift_ideas (id) {
         id -> Integer,
-        name -> Text,
+        title -> Text,
         description -> Nullable<Text>,
         price -> Nullable<Text>,
         url -> Nullable<Text>,
-        intended_for_user_id -> Nullable<Integer>,
+        date_added -> Timestamp,
+        date_last_modified -> Timestamp,
+        date_reserved -> Nullable<Timestamp>,
+        owner_id -> Integer,
+        recipient_user_id -> Integer,
         reserved_by_user_id -> Nullable<Integer>,
     }
 }
@@ -26,14 +30,6 @@ table! {
         id -> Integer,
         user_id -> Integer,
         destination_id -> Integer,
-    }
-}
-
-table! {
-    user_gift_ideas (id) {
-        id -> Integer,
-        user_id -> Integer,
-        gift_idea_id -> Integer,
     }
 }
 
@@ -50,13 +46,10 @@ table! {
 
 joinable!(user_destinations -> destinations (destination_id));
 joinable!(user_destinations -> users (user_id));
-joinable!(user_gift_ideas -> gift_ideas (gift_idea_id));
-joinable!(user_gift_ideas -> users (user_id));
 
 allow_tables_to_appear_in_same_query!(
     destinations,
     gift_ideas,
     user_destinations,
-    user_gift_ideas,
     users,
 );

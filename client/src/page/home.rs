@@ -55,7 +55,7 @@ pub fn view(model: &Model) -> ViewPage<Msg> {
     ViewPage::new(
         "Home",
         div![
-            class!["col-md-6", "offset-md-3" "mt-5"],
+            class!["col-md-6", "offset-md-3" "mt-4"],
             div![
                 class!["jumbotron"],
                 h2!["Welcome to the Gift App"],

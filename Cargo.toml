@@ -10,4 +10,4 @@
 # simple_logger = "1.6.0"
 
 [workspace]
-members = ["server", "client"]
+members = ["server", "client", "shared"]

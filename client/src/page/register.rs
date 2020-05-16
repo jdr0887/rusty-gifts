@@ -5,9 +5,7 @@ use crate::GMsg;
 use crate::LoggedUser;
 use seed::prelude::*;
 use seed::*;
-use serde::{Deserialize, Serialize};
 use std::collections;
-use web_sys;
 
 #[derive(Default, Clone, Debug)]
 pub struct Form {
@@ -98,7 +96,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg, GMsg>) 
         }
         Msg::RegisterFetched(Ok(logged_user)) => {
             LocalStorage::insert(crate::STORAGE_KEY, &logged_user).expect("save user");
-            orders.send_g_msg(GMsg::SessionChanged(Session::LoggedIn(logged_user)));
+            //orders.send_g_msg(GMsg::SessionChanged(Session::LoggedIn(logged_user)));
             route::go_to(route::Route::GiftIdeas, orders);
         }
         Msg::RegisterFetched(Err(error)) => log!(error),
@@ -109,10 +107,10 @@ pub fn view(model: &Model) -> ViewPage<Msg> {
     ViewPage::new(
         "Register",
         div![
-            class!["col-md-4", "offset-md-4" "mt-5"],
+            class!["col-md-4", "offset-md-4" "mt-4"],
             div![
                 attrs! { At::Class => "card" },
-                h4![attrs! { At::Class => "card-header" }, "Gift App Register",],
+                h4![attrs! { At::Class => "card-header" }, "Register",],
                 div![
                     attrs! { At::Class => "card-body" },
                     form![
@@ -159,18 +157,12 @@ pub fn view(model: &Model) -> ViewPage<Msg> {
                         div![
                             attrs! { At::Class => "form-group" },
                             label![
-                                match model.form.confirm_password != model.form.password {
-                                    true => class!["control-label", "text-danger"],
-                                    _ => class!["control-label"],
-                                },
+                                class!["control-label", "text-danger" => model.form.confirm_password != model.form.password ],
                                 attrs! { At::For => "confirm_password_error" },
                                 "Confirm Password"
                             ],
                             input![
-                                match model.form.confirm_password != model.form.password {
-                                    true => class!["form-control", "is-invalid"],
-                                    _ => class!["form-control"],
-                                },
+                                class!["form-control", "is-invalid" => model.form.confirm_password != model.form.password ],
                                 attrs! { At::Type => "password", At::Id => "confirm_password_error", At::Value => model.form.confirm_password, },
                                 input_ev(Ev::Input, Msg::ConfirmPasswordChanged),
                             ],

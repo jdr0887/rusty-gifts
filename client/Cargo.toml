@@ -16,3 +16,6 @@ wasm-bindgen = "^0.2.62"
 web-sys = "^0.3.39"
 log = { version = "^0.4.8" }
 simple_logger = "1.6.0"
+enclose = "1.1.8"
+futures-timer = "3.0.2"
+futures = "0.3.4"

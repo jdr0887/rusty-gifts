@@ -12,8 +12,9 @@ actix-files = "0.2.1"
 actix-session = "0.3"
 actix-utils = "1.0.6"
 
+chrono = { version = "0.4", features = ["serde"] }
 bytes = "0.5"
-diesel = { version = "1.4", features = ["sqlite", "r2d2"] }
+diesel = { version = "1.4", features = ["sqlite", "r2d2", "chrono"] }
 dotenv = "0.15"
 env_logger = "0.7"
 futures = "0.3"
