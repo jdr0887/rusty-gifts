@@ -8,14 +8,16 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-shared = { path = "../shared" }
+enclose = "1.1.8"
+futures = "0.3.4"
+futures-timer = "3.0.2"
+lazy_static = "1.4.0"
+log = { version = "0.4.8" }
+regex = "1"
+seed = { path = "../../../../github/seed/seed" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1"
-seed = { path = "../../../../github/seed/seed" }
+shared = { path = "../shared" }
+simple_logger = "1.6.0"
 wasm-bindgen = "^0.2.62"
 web-sys = "^0.3.39"
-log = { version = "^0.4.8" }
-simple_logger = "1.6.0"
-enclose = "1.1.8"
-futures-timer = "3.0.2"
-futures = "0.3.4"
