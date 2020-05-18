@@ -1,8 +1,6 @@
-use crate::LoggedUser;
-
 #[derive(Clone, Debug)]
 pub enum Session {
-    LoggedIn(LoggedUser),
+    LoggedIn(shared::LoggedUser),
     Guest,
 }
 
@@ -13,13 +11,13 @@ impl<'a> Default for Session {
 }
 
 impl<'a> Session {
-    pub fn new(viewer: Option<LoggedUser>) -> Self {
+    pub fn new(viewer: Option<shared::LoggedUser>) -> Self {
         match viewer {
             Some(viewer) => Self::LoggedIn(viewer),
             None => Self::Guest,
         }
     }
-    pub fn viewer(&self) -> Option<&LoggedUser> {
+    pub fn viewer(&self) -> Option<&shared::LoggedUser> {
         match self {
             Self::LoggedIn(viewer) => Some(viewer),
             Self::Guest => None,

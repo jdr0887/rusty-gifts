@@ -2,7 +2,6 @@ use crate::page::ViewPage;
 use crate::route;
 use crate::session::Session;
 use crate::GMsg;
-use crate::LoggedUser;
 use seed::prelude::*;
 use seed::*;
 
@@ -62,7 +61,7 @@ pub enum Msg {
     PasswordChanged(String),
     LoginSubmitted,
     LoginCancelled,
-    LoginFetched(fetch::Result<LoggedUser>),
+    LoginFetched(fetch::Result<shared::LoggedUser>),
     RegisterClicked,
 }
 
@@ -86,25 +85,6 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg, GMsg>) 
         }
         Msg::LoginFetched(Err(error)) => log!(error),
         Msg::RegisterClicked => route::go_to(route::Route::Register, orders),
-        // Msg::FormSubmitted => match model.form.trim_fields().validate() {
-        //     Ok(valid_form) => {
-        //         model.problems.clear();
-        //         orders.perform_cmd(request::login::login(&valid_form, Msg::LoginCompleted));
-        //     }
-        //     Err(problems) => {
-        //         model.problems = problems;
-        //     }
-        // },
-        // Msg::FieldChanged(field) => {
-        //     model.form.upsert_field(field);
-        // }
-        // Msg::LoginCompleted(Ok(viewer)) => {
-        //     viewer.store();
-        //     orders.send_g_msg(GMsg::SessionChanged(Session::LoggedIn(viewer)));
-        // }
-        // Msg::LoginCompleted(Err(problems)) => {
-        //     model.problems = problems;
-        // }
     }
 }
 

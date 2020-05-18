@@ -1,9 +1,9 @@
 #![allow(clippy::must_use_candidate)]
 use crate::route::Route;
+use lazy_static::lazy_static;
 use page::Page;
+use regex::Regex;
 use seed::prelude::*;
-use seed::*;
-use serde::{Deserialize, Serialize};
 use std::convert::TryInto;
 use std::mem::take;
 
@@ -15,13 +15,8 @@ mod session;
 
 const STORAGE_KEY: &str = "gift_app";
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
-#[allow(dead_code)]
-pub struct LoggedUser {
-    id: i32,
-    email: String,
-    first_name: String,
-    last_name: String,
+lazy_static! {
+    pub static ref VALID_EMAIL_REGEX: Regex = Regex::new("^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$").unwrap();
 }
 
 #[derive(Debug)]
@@ -172,7 +167,9 @@ fn view(model: &Model) -> impl IntoNodes<Msg> {
         Model::Register(model) => Page::Register.view(page::register::view(model), model.session().viewer()).map_msg(Msg::RegisterMsg),
         Model::Profile(model) => Page::Profile.view(page::profile::view(model), model.session().viewer()).map_msg(Msg::ProfileMsg),
         Model::GiftIdeas(model) => Page::GiftIdeas.view(page::gift_ideas::view(model), model.session().viewer()).map_msg(Msg::GiftIdeasMsg),
-        Model::AddGiftIdea(model) => Page::AddGiftIdea.view(page::add_gift_idea::view(model), model.session().viewer()).map_msg(Msg::AddGiftIdeaMsg),
+        Model::AddGiftIdea(model) => Page::AddGiftIdea
+            .view(page::add_gift_idea::view(model), model.session().viewer())
+            .map_msg(Msg::AddGiftIdeaMsg),
     }
 }
 

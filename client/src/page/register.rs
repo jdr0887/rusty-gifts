@@ -2,10 +2,8 @@ use crate::page::ViewPage;
 use crate::route;
 use crate::session::Session;
 use crate::GMsg;
-use crate::LoggedUser;
 use seed::prelude::*;
 use seed::*;
-use std::collections;
 
 #[derive(Default, Clone, Debug)]
 pub struct Form {
@@ -32,7 +30,6 @@ impl From<Form> for shared::RegisterRequestBody {
 #[derive(Default, Debug)]
 pub struct Model {
     session: Session,
-    problems: collections::HashMap<String, String>,
     form: Form,
 }
 
@@ -73,7 +70,7 @@ pub enum Msg {
     ConfirmPasswordChanged(String),
     RegisterSubmitted,
     RegisterCancelled,
-    RegisterFetched(fetch::Result<LoggedUser>),
+    RegisterFetched(fetch::Result<shared::LoggedUser>),
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg, GMsg>) {
@@ -87,7 +84,16 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg, GMsg>) 
         Msg::ConfirmPasswordChanged(confirm_password) => model.form.confirm_password = confirm_password,
         Msg::RegisterCancelled => route::go_to(route::Route::Home, orders),
         Msg::RegisterSubmitted => {
+            let mut is_valid = true;
+
             if model.form.confirm_password == model.form.password {
+                is_valid = false;
+            }
+            if !model.form.email.is_empty() && crate::VALID_EMAIL_REGEX.is_match(model.form.email.as_str()) {
+                is_valid = false;
+            }
+
+            if is_valid {
                 let request = Request::new("/v1/users/add")
                     .method(Method::Post)
                     .json::<shared::RegisterRequestBody>(&model.form.clone().into());
@@ -134,9 +140,14 @@ pub fn view(model: &Model) -> ViewPage<Msg> {
                             attrs! { At::Class => "form-group" },
                             label!["Email"],
                             input![
-                                attrs! { At::Type => "text", At::Class => "form-control", At::Value => model.form.email, },
+                                class!["form-control", "is-invalid" => !model.form.email.is_empty() && !crate::VALID_EMAIL_REGEX.is_match(model.form.email.as_str()) ],
+                                attrs! { At::Type => "text", At::Value => model.form.email, },
                                 input_ev(Ev::Input, Msg::EmailChanged)
                             ],
+                            match !model.form.email.is_empty() && crate::VALID_EMAIL_REGEX.is_match(model.form.email.as_str()) {
+                                false => div![class!["invalid-feedback"], "Invalid email"],
+                                _ => empty![],
+                            }
                         ],
                         div![
                             attrs! { At::Class => "form-group" },
@@ -166,6 +177,10 @@ pub fn view(model: &Model) -> ViewPage<Msg> {
                                 attrs! { At::Type => "password", At::Id => "confirm_password_error", At::Value => model.form.confirm_password, },
                                 input_ev(Ev::Input, Msg::ConfirmPasswordChanged),
                             ],
+                            match model.form.confirm_password != model.form.password {
+                                true => div![class!["invalid-feedback"], "Passwords don't match"],
+                                _ => empty![],
+                            }
                         ],
                         div![
                             attrs! { At::Class => "form-group" },

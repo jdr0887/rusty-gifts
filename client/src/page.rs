@@ -1,5 +1,4 @@
 use crate::route::Route;
-use crate::LoggedUser;
 use seed::prelude::*;
 use seed::*;
 
@@ -72,13 +71,13 @@ pub enum Page {
 
 #[allow(clippy::unused_self)]
 impl Page {
-    pub fn view<Ms>(&self, view_page: ViewPage<Ms>, viewer: Option<&LoggedUser>) -> Vec<Node<Ms>> {
+    pub fn view<Ms>(&self, view_page: ViewPage<Ms>, viewer: Option<&shared::LoggedUser>) -> Vec<Node<Ms>> {
         seed::document().set_title(&view_page.title());
         vec![self.view_header(viewer), view_page.into_content()]
         // vec![view_page.into_content()]
     }
 
-    fn view_header<Ms>(&self, viewer: Option<&LoggedUser>) -> Node<Ms> {
+    fn view_header<Ms>(&self, viewer: Option<&shared::LoggedUser>) -> Node<Ms> {
         match viewer {
             None => empty![],
             Some(viewer) => nav![

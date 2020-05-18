@@ -224,7 +224,6 @@ async fn main() -> std::io::Result<()> {
     let pool = r2d2::Pool::builder().max_size(1).build(manager).expect("Failed to create pool.");
 
     let bind = "127.0.0.1:8000";
-    //let bind = "192.168.0.9:8000";
 
     println!("Starting server at: {}", &bind);
 
@@ -245,7 +244,6 @@ async fn main() -> std::io::Result<()> {
                     .service(update_gift)
                     .service(find_gift_by_id)
                     .service(find_all_gifts)
-                    // .service(find_my_gifts)
                     .service(reserve)
                     .service(unreserve)
                     .default_service(web::route().to(web::HttpResponse::NotFound)),

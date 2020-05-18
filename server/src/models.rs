@@ -20,11 +20,11 @@ pub struct User {
 #[changeset_options(treat_none_as_null = "true")]
 #[table_name = "users"]
 pub struct NewUser {
+    pub email: String,
+    pub password: String,
     pub first_name: Option<String>,
     pub last_name: Option<String>,
-    pub email: String,
     pub phone: Option<String>,
-    pub password: String,
 }
 
 impl NewUser {

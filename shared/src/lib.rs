@@ -1,5 +1,14 @@
 use serde::{Deserialize, Serialize};
 
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[allow(dead_code)]
+pub struct LoggedUser {
+    pub id: i32,
+    pub email: String,
+    pub first_name: String,
+    pub last_name: String,
+}
+
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct RegisterRequestBody {
     pub email: String,
