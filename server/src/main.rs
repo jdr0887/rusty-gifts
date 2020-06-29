@@ -223,7 +223,7 @@ async fn main() -> std::io::Result<()> {
 
     let pool = r2d2::Pool::builder().max_size(1).build(manager).expect("Failed to create pool.");
 
-    let bind = "127.0.0.1:8000";
+    let bind = "127.0.0.1:8080";
 
     println!("Starting server at: {}", &bind);
 
